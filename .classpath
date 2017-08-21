@@ -32,10 +32,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/spark-examples_2.11-2.1.1.jar" sourcepath="C:/lib/src/spark-examples_2.11-2.1.1.jar.src.zip">
-		<attributes>
-			<attribute name="source_encoding" value="UTF-8"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="libs/spark-examples_2.11-2.1.1.jar" sourcepath="C:/lib/src/spark-examples_2.11-2.1.1.jar.src.zip"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

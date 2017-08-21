@@ -3,27 +3,16 @@ package com.cry.bd;
 import java.net.InetAddress;
 import java.util.ResourceBundle;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
-/**
- * @Project: 中软天弓系统
- * @Packpage: com.gzcss.konview.common
- * @ClassName: ElasticsearchUtil
- * @JDK version used: JDK 1.6
- * @Description:
- *               <p>
- *               </p>
- * @author: cairuoyu
- * @Create Date:2017�?7�?14�?
- * @Modified By:cairuoyu
- * @Modified Date:2017�?7�?14�?
- * @Why and What is modified:Because it
- * @Version: pts1.0
- */
-public class ElasticsearchUtil {
+public class TestElasticSearch {
 
 	private static final ResourceBundle bundle = java.util.ResourceBundle.getBundle("sysConfig");
 
@@ -33,16 +22,29 @@ public class ElasticsearchUtil {
 
 	public static TransportClient client = getClient();
 
-	/**
-	 * getClient 方法
-	 * <p>
-	 * </p>
-	 * 
-	 * @return
-	 * @author cairuoyu
-	 * @date 2017�?7�?14�?
-	 */
-	@SuppressWarnings({ "resource", "unchecked" })
+	public void f2() throws Exception {
+		XContentBuilder jsonBuild = XContentFactory.jsonBuilder();
+		jsonBuild.startObject().field("ci_code", "1-012-000686").endObject();
+
+		String jsonData = jsonBuild.string();
+		System.out.println(jsonData);
+	}
+
+	public void f1() throws Exception {
+		TransportClient client = getClient();
+		SearchResponse response = client.prepareSearch("test")
+				// .setQuery(QueryBuilders.termQuery("cpu_status", 1))
+				// .setPostFilter(QueryBuilders.rangeQuery("cpu_status").from(2.2).to(22))
+				.get();
+		SearchHit[] hits = response.getHits().getHits();
+		System.out.println("-----------" + hits.length);
+		for (SearchHit hit : hits) {
+			// System.out.println(hit.getSource());
+			System.out.println(hit.getSource().get("collectiontime"));
+		}
+	}
+
+	@SuppressWarnings({ "resource" })
 	public static TransportClient getClient() {
 		TransportClient client = null;
 		Settings settings = Settings.builder().put("cluster.name", bundle.getString(ES_CLUSTER_NAME)).build();

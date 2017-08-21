@@ -62,6 +62,5 @@ public class TestML {
 		Double MSE = valuesAndPreds.mapToDouble((Tuple2<Double, Double> t) -> Math.pow(t._1() - t._2(), 2)).mean(); // 计算预测值与实际值差值的平方值的均值
 		System.out.println(model.getClass().getName() + " training Mean Squared Error = " + MSE);
 	}
-	
-	
+
 }

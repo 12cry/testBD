@@ -35,13 +35,13 @@ import org.spark_project.guava.collect.ImmutableMap;
 
 import scala.Tuple2;
 
-public class TestSparkStreaming {
+public class TestSpark {
 
 	public static final String IP = "192.168.153.132";
 
 	public static final void main(String[] ss) throws Exception {
 		Arrays.asList("a", "b", "d").forEach(e -> System.out.println(e));
-		TestSparkStreaming t = new TestSparkStreaming();
+		TestSpark t = new TestSpark();
 		// t.spark1(ss);
 		// t.sparkStreaming1(ss);
 		// t.testSparkKafka(ss);
