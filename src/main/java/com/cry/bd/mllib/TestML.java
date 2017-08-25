@@ -1,8 +1,10 @@
 
-package com.cry.bd;
+package com.cry.bd.mllib;
 
 import java.util.Arrays;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -23,6 +25,7 @@ import scala.Tuple2;
 public class TestML {
 
 	public static void main(String[] args) {
+		Logger.getLogger("org").setLevel(Level.ERROR);
 		TestML t = new TestML();
 	}
 

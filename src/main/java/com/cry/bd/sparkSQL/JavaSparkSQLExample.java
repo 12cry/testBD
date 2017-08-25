@@ -1,12 +1,16 @@
 package com.cry.bd.sparkSQL;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Column;
@@ -14,12 +18,15 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoder;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 public class JavaSparkSQLExample {
-	
-	
+
 	public static class Person implements Serializable {
 		private String name;
 		private int age;
@@ -44,7 +51,9 @@ public class JavaSparkSQLExample {
 	public static void main(String[] args) throws AnalysisException {
 		Logger.getLogger("org").setLevel(Level.ERROR);
 		SparkConf conf = new SparkConf().setMaster("local").setAppName("Spark1");
-//		SparkSession spark = SparkSession.builder().appName("Java Spark SQL basic example").config("spark.some.config.option", "some-value").getOrCreate();
+		// SparkSession spark = SparkSession.builder().appName("Java Spark SQL
+		// basic example").config("spark.some.config.option",
+		// "some-value").getOrCreate();
 		SparkSession spark = SparkSession.builder().config(conf).getOrCreate();
 
 		runBasicDataFrameExample(spark);
@@ -108,80 +117,100 @@ public class JavaSparkSQLExample {
 		peopleDS.show();
 	}
 
-	// @SuppressWarnings("unchecked")
-	// private static void runInferSchemaExample(SparkSession spark) {
-	// JavaRDD<Person> peopleRDD =
-	// spark.read().textFile("examples/src/main/resources/people.txt").javaRDD().map(new
-	// Function() {
-	// public JavaSparkSQLExample.Person call(String line) throws Exception {
-	// String[] parts = line.split(",");
-	// JavaSparkSQLExample.Person person = new JavaSparkSQLExample.Person();
-	// person.setName(parts[0]);
-	// person.setAge(Integer.parseInt(parts[1].trim()));
-	// return person;
-	// }
-	// });
-	// Dataset<Row> peopleDF = spark.createDataFrame(peopleRDD, Person.class);
-	//
-	// peopleDF.createOrReplaceTempView("people");
-	//
-	// Dataset<Row> teenagersDF = spark.sql("SELECT name FROM people WHERE age
-	// BETWEEN 13 AND 19");
-	//
-	// Encoder<String> stringEncoder = Encoders.STRING();
-	// Dataset<String> teenagerNamesByIndexDF = teenagersDF.map(new
-	// MapFunction() {
-	// public String call(Row row) throws Exception {
-	// return "Name: " + row.getString(0);
-	// }
-	// }, stringEncoder);
-	//
-	// teenagerNamesByIndexDF.show();
-	//
-	// Dataset<String> teenagerNamesByFieldDF = teenagersDF.map(new
-	// MapFunction() {
-	// public String call(Row row) throws Exception {
-	// return "Name: " + (String) row.getAs("name");
-	// }
-	// }, stringEncoder);
-	//
-	// teenagerNamesByFieldDF.show();
-	// }
-	//
-	// private static void runProgrammaticSchemaExample(SparkSession spark) {
-	// JavaRDD<String> peopleRDD =
-	// spark.sparkContext().textFile("examples/src/main/resources/people.txt",
-	// 1).toJavaRDD();
-	//
-	// String schemaString = "name age";
-	//
-	// List<StructField> fields = new ArrayList();
-	// for (String fieldName : schemaString.split(" ")) {
-	// StructField field = DataTypes.createStructField(fieldName,
-	// DataTypes.StringType, true);
-	// fields.add(field);
-	// }
-	// StructType schema = DataTypes.createStructType(fields);
-	//
-	// JavaRDD<Row> rowRDD = peopleRDD.map(new Function() {
-	// public Row call(String record) throws Exception {
-	// String[] attributes = record.split(",");
-	// return RowFactory.create(new Object[] { attributes[0],
-	// attributes[1].trim() });
-	// }
-	// });
-	// Dataset<Row> peopleDataFrame = spark.createDataFrame(rowRDD, schema);
-	//
-	// peopleDataFrame.createOrReplaceTempView("people");
-	//
-	// Dataset<Row> results = spark.sql("SELECT name FROM people");
-	//
-	// Dataset<String> namesDS = results.map(new MapFunction() {
-	// public String call(Row row) throws Exception {
-	// return "Name: " + row.getString(0);
-	// }
-	// }, Encoders.STRING());
-	//
-	// namesDS.show();
-	// }
+	@SuppressWarnings("unchecked")
+	private static void runInferSchemaExample(SparkSession spark) {
+		JavaRDD<Person> peopleRDD = spark.read().textFile("examples/src/main/resources/people.txt").javaRDD().map(new Function() {
+			public JavaSparkSQLExample.Person call(String line) throws Exception {
+				String[] parts = line.split(",");
+				JavaSparkSQLExample.Person person = new JavaSparkSQLExample.Person();
+				person.setName(parts[0]);
+				person.setAge(Integer.parseInt(parts[1].trim()));
+				return person;
+			}
+
+			@Override
+			public Object call(Object v1) throws Exception {
+				return null;
+			}
+		});
+		Dataset<Row> peopleDF = spark.createDataFrame(peopleRDD, Person.class);
+
+		peopleDF.createOrReplaceTempView("people");
+
+		Dataset<Row> teenagersDF = spark.sql("SELECT name FROM people WHERE age BETWEEN 13 AND 19");
+
+		Encoder<String> stringEncoder = Encoders.STRING();
+		Dataset<String> teenagerNamesByIndexDF = teenagersDF.map(new MapFunction() {
+			public String call(Row row) throws Exception {
+				return "Name: " + row.getString(0);
+			}
+
+			@Override
+			public Object call(Object value) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		}, stringEncoder);
+
+		teenagerNamesByIndexDF.show();
+
+		Dataset<String> teenagerNamesByFieldDF = teenagersDF.map(new MapFunction() {
+			public String call(Row row) throws Exception {
+				return "Name: " + (String) row.getAs("name");
+			}
+
+			@Override
+			public Object call(Object value) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		}, stringEncoder);
+
+		teenagerNamesByFieldDF.show();
+	}
+
+	private static void runProgrammaticSchemaExample(SparkSession spark) {
+		JavaRDD<String> peopleRDD = spark.sparkContext().textFile("examples/src/main/resources/people.txt", 1).toJavaRDD();
+
+		String schemaString = "name age";
+
+		List<StructField> fields = new ArrayList();
+		for (String fieldName : schemaString.split(" ")) {
+			StructField field = DataTypes.createStructField(fieldName, DataTypes.StringType, true);
+			fields.add(field);
+		}
+		StructType schema = DataTypes.createStructType(fields);
+
+		JavaRDD<Row> rowRDD = peopleRDD.map(new Function() {
+			public Row call(String record) throws Exception {
+				String[] attributes = record.split(",");
+				return RowFactory.create(new Object[] { attributes[0], attributes[1].trim() });
+			}
+
+			@Override
+			public Object call(Object v1) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		});
+		Dataset<Row> peopleDataFrame = spark.createDataFrame(rowRDD, schema);
+
+		peopleDataFrame.createOrReplaceTempView("people");
+
+		Dataset<Row> results = spark.sql("SELECT name FROM people");
+
+		Dataset<String> namesDS = results.map(new MapFunction() {
+			public String call(Row row) throws Exception {
+				return "Name: " + row.getString(0);
+			}
+
+			@Override
+			public Object call(Object value) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		}, Encoders.STRING());
+
+		namesDS.show();
+	}
 }

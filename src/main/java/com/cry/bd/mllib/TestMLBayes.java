@@ -1,5 +1,5 @@
 
-package com.cry.bd;
+package com.cry.bd.mllib;
 
 import java.io.Serializable;
 import java.util.Arrays;
