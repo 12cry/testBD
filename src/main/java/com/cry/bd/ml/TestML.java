@@ -9,6 +9,9 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.ml.classification.LogisticRegression;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
+import org.apache.spark.ml.classification.NaiveBayes;
+import org.apache.spark.ml.classification.NaiveBayesModel;
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.feature.HashingTF;
 import org.apache.spark.ml.feature.IDF;
 import org.apache.spark.ml.feature.IDFModel;
@@ -32,6 +35,8 @@ import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
+import com.cry.bd.Utils;
+
 public class TestML {
 
 	SparkSession spark = TestML.getSpark();
@@ -46,12 +51,49 @@ public class TestML {
 		// t.testLogisticRegression();
 		// t.test1();
 		// t.testIDF();
+		// t.test2();
+//		t.test3();
+		t.test4();
+	}
 
-		t.test2();
+	public void test4() throws Exception {
+		Dataset<Row> ds = Utils.getDS(new double[][] { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 1 }, { 2, 2 } }, new double[] { 0, 0, 1, 1, 1 });
+		Dataset<Row> ds2 = Utils.getDS(new double[][] { { 2, 3 } }, new double[] { 1 });
+		ds.show(false);
+		NaiveBayes dt = new NaiveBayes();
+		Dataset<Row> transform = dt.fit(ds).transform(ds2);
+		transform.show();
+		
+		MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator().setLabelCol("label").setPredictionCol("prediction").setMetricName("accuracy");
+		double accuracy = evaluator.evaluate(transform);
+		System.out.println("Test set accuracy = " + accuracy);
+	}
+
+	public void test3() throws Exception {
+		Dataset<Row> dataFrame = spark.read().format("libsvm").load("data/mllib/sample_libsvm_data.txt");
+		// Split the data into train and test
+		Dataset<Row>[] splits = dataFrame.randomSplit(new double[] { 0.6, 0.4 }, 1234L);
+		Dataset<Row> train = splits[0];
+		Dataset<Row> test = splits[1];
+
+		// create the trainer and set its parameters
+		NaiveBayes nb = new NaiveBayes();
+
+		// train the model
+		NaiveBayesModel model = nb.fit(train);
+
+		// Select example rows to display.
+		Dataset<Row> predictions = model.transform(test);
+		predictions.show();
+
+		// compute accuracy on the test set
+		MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator().setLabelCol("label").setPredictionCol("prediction").setMetricName("accuracy");
+		double accuracy = evaluator.evaluate(predictions);
+		System.out.println("Test set accuracy = " + accuracy);
 	}
 
 	public void test2() throws Exception {
-		Dataset<Row> ds = spark.createDataFrame(TestMLData.getRowList(new double[][] { { 5, 5 }, { 7, 7 } }, new double[] { 0, 1 }), TestMLData.getStructType2());
+		Dataset<Row> ds = Utils.getDS(new double[][] { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 1 }, { 2, 2 } }, new double[] { 0, 0, 1, 1, 1 });
 		ds.show();
 
 		// LinearRegression lr = new LinearRegression();
@@ -59,7 +101,7 @@ public class TestML {
 		LogisticRegression lr = new LogisticRegression();
 		LogisticRegressionModel m = lr.fit(ds);
 
-		m.transform(spark.createDataFrame(TestMLData.getRowList(new double[][] { { 4, 4 }, { 8, 8 } }), TestMLData.getStructType())).show(false);
+		m.transform(Utils.getDS(new double[][] { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 1 }, { 2, 2 } }, new double[] { 0, 0, 1, 1, 1 })).show(false);
 
 		System.out.println("Coefficients: " + m.coefficients() + " Intercept: " + m.intercept());
 
@@ -182,7 +224,7 @@ public class TestML {
 
 	public static SparkSession getSpark() {
 		Logger.getLogger("org").setLevel(Level.ERROR);
-		SparkConf conf = new SparkConf().setMaster("local").setAppName("Spark1");
+		SparkConf conf = new SparkConf().setMaster("local[3]").setAppName("Spark1");
 		SparkSession spark = SparkSession.builder().config(conf).getOrCreate();
 		return spark;
 	}
