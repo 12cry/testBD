@@ -30,9 +30,9 @@ public class TestML2 {
 
 	public static void main(String[] args) throws Exception {
 		TestML2 t = new TestML2();
-		// t.testDisk();
+		 t.testDisk();
 //		t.test1();
-		t.testDisks();
+//		t.testDisks();
 	}
 
 	public void testDisks() throws Exception {
@@ -65,7 +65,7 @@ public class TestML2 {
 			StructType schema = new StructType(new StructField[] { new StructField("label", DataTypes.DoubleType, false, Metadata.empty()),
 					new StructField("features", new VectorUDT(), false, Metadata.empty()) });
 			Dataset<Row> ds2 = TestML.getSpark().createDataFrame(list, schema);
-			ds2.show();
+//			ds2.show();
 
 			LinearRegression lr = new LinearRegression().setMaxIter(10);
 			LinearRegressionModel m = lr.fit(ds2);
