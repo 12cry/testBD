@@ -40,13 +40,12 @@ public class TestSpark {
 	public static final String IP = "192.168.153.132";
 
 	public static final void main(String[] ss) throws Exception {
-		Arrays.asList("a", "b", "d").forEach(e -> System.out.println(e));
 		TestSpark t = new TestSpark();
 		// t.spark1(ss);
-		// t.sparkStreaming1(ss);
+		t.sparkStreaming1(ss);
 		// t.testSparkKafka(ss);
 		// t.testSparkElasticSearch(ss);
-		t.testSparkAll(ss);
+		// t.testSparkAll(ss);
 	}
 
 	public void testSparkAll(String[] ss) throws Exception {
@@ -61,7 +60,8 @@ public class TestSpark {
 		kafkaParams.put("auto.offset.reset", "earliest");
 		kafkaParams.put("enable.auto.commit", false);
 
-		JavaInputDStream<ConsumerRecord<String, String>> stream = KafkaUtils.createDirectStream(jssc, LocationStrategies.PreferConsistent(),
+		JavaInputDStream<ConsumerRecord<String, String>> stream = KafkaUtils.createDirectStream(jssc,
+				LocationStrategies.PreferConsistent(),
 				ConsumerStrategies.<String, String>Subscribe(Arrays.asList("test"), kafkaParams));
 
 		System.out.println("---------------------");
@@ -122,7 +122,8 @@ public class TestSpark {
 		Map<TopicPartition, Long> offsetMap = new HashMap<>();
 		// offsetMap.put(new TopicPartition("test",0), 41L);
 
-		JavaInputDStream<ConsumerRecord<String, String>> stream = KafkaUtils.createDirectStream(jssc, LocationStrategies.PreferConsistent(),
+		JavaInputDStream<ConsumerRecord<String, String>> stream = KafkaUtils.createDirectStream(jssc,
+				LocationStrategies.PreferConsistent(),
 				ConsumerStrategies.<String, String>Subscribe(Arrays.asList("test"), kafkaParams, offsetMap));
 
 		stream.foreachRDD(rdd -> {
@@ -134,7 +135,8 @@ public class TestSpark {
 
 			rdd.foreachPartition(consumerRecords -> {
 				OffsetRange o = offsetRanges[TaskContext.get().partitionId()];
-				System.out.println("----------" + o.topic() + " " + o.partition() + " " + o.fromOffset() + " " + o.untilOffset());
+				System.out.println(
+						"----------" + o.topic() + " " + o.partition() + " " + o.fromOffset() + " " + o.untilOffset());
 			});
 		});
 
@@ -155,7 +157,7 @@ public class TestSpark {
 		SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("sparkStreaming1");
 		JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(10));
 
-		// nc -l -p 9999
+		// nc -lp 9999
 		JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
 		JavaDStream<String> words = lines.flatMap(x -> Arrays.asList(x.split(" ")).iterator());
 
@@ -165,7 +167,7 @@ public class TestSpark {
 		System.out.println("--------------");
 		wordCounts.print();
 		jssc.start();
-		// jssc.awaitTermination();
+		jssc.awaitTermination();
 
 	}
 

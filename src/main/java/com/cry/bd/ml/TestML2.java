@@ -37,7 +37,10 @@ public class TestML2 {
 	}
 
 	public void testDisks2() throws Exception {
+		//1.初始化
 		SparkSession spark = TestML.getSpark();
+		
+		//2.查询数据
 		Dataset<Row> df = spark.read().format("jdbc").option("url", "jdbc:mysql://localhost:3306/test1?useUnicode=true&characterEncoding=UTF-8")
 				.option("dbtable", "t_p_host_disk_his").option("driver", "com.mysql.jdbc.Driver").option("user", "root").option("password", "root").load();
 		df.createTempView("t_p_host_disk_his");
@@ -47,6 +50,7 @@ public class TestML2 {
 		System.out.println(ds1.count());
 		ds1.show();
 
+		//3.转换数据
 		ds1.javaRDD().mapToPair(row -> {
 			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -59,8 +63,6 @@ public class TestML2 {
 			return l1;
 		}).foreach(t -> {
 			System.out.println("---------------------------------------------------------");
-			System.out.println(t._1);
-			System.out.println(t._2);
 			List<Row> list = new ArrayList<Row>();
 			for (Map<String, Object> map : t._2) {
 				list.add(RowFactory.create(map.get("label"), Vectors.dense((Double) map.get("time"))));
@@ -69,10 +71,11 @@ public class TestML2 {
 			StructType schema = new StructType(new StructField[]{new StructField("label", DataTypes.DoubleType, false, Metadata.empty()),
 					new StructField("features", new VectorUDT(), false, Metadata.empty())});
 			Dataset<Row> ds2 = TestML.getSpark().createDataFrame(list, schema);
-
+			//4.训练数据生成模型
 			LinearRegression lr = new LinearRegression().setMaxIter(10);
 			LinearRegressionModel m = lr.fit(ds2);
-
+			
+			//5.展显结果参数并预测
 			System.out.println("Coefficients: " + m.coefficients() + " Intercept: " + m.intercept());
 			LinearRegressionTrainingSummary trainingSummary = m.summary();
 			System.out.println("numIterations: " + trainingSummary.totalIterations());

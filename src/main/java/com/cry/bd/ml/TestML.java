@@ -42,14 +42,14 @@ public class TestML {
 
 		TestML t = new TestML();
 		// t.testCorrelation();
-		// t.testLinearRegression();
+		 t.testLinearRegression();
 		// t.testWord2Vec();
 		// t.testLogisticRegression();
 		// t.test1();
 		// t.testIDF();
 		// t.test2();
 //		t.test3();
-		t.test4();
+//		t.test4();
 	}
 
 	public void test4() throws Exception {
@@ -130,6 +130,7 @@ public class TestML {
 
 	public void testLinearRegression() {
 		Dataset<Row> training = spark.read().format("libsvm").load("data/mllib/sample_linear_regression_data.txt");
+//		Dataset<Row> training = spark.read().format("libsvm").load("data/t1.libsvm");
 
 		LinearRegression lr = new LinearRegression().setMaxIter(10).setRegParam(0.3).setElasticNetParam(0.8);
 		LinearRegressionModel lrModel = lr.fit(training);
