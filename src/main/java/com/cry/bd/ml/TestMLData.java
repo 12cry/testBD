@@ -22,7 +22,7 @@ import com.cry.bd.Utils;
 
 public class TestMLData {
 
-	public SparkSession spark = TestML.getSpark();
+	SparkSession sparkSession = Utils.getSparkSession();
 
 	public static void main(String[] args) {
 		TestMLData t = new TestMLData();
@@ -53,7 +53,7 @@ public class TestMLData {
 	}
 
 	public void f5() {
-		Dataset<Row> data = spark.read().format("libsvm").load("data/mllib/sample_libsvm_data.txt");
+		Dataset<Row> data = sparkSession.read().format("libsvm").load("data/mllib/sample_libsvm_data.txt");
 
 		VectorIndexer indexer = new VectorIndexer().setInputCol("features").setOutputCol("indexed").setMaxCategories(2);
 		VectorIndexerModel indexerModel = indexer.fit(data);
@@ -66,8 +66,6 @@ public class TestMLData {
 		}
 		System.out.println();
 
-		// Create new column "indexed" with categorical values transformed to
-		// indices
 		Dataset<Row> indexedData = indexerModel.transform(data);
 		indexedData.show(false);
 	}
@@ -84,14 +82,9 @@ public class TestMLData {
 		List<Row> data = Arrays.asList(RowFactory.create(Vectors.sparse(4, new int[] { 0, 3 }, new double[] { 1.0, -2.0 })), RowFactory.create(Vectors.dense(4.0, 5.0, 0.0, 3.0)),
 				RowFactory.create(Vectors.dense(6.0, 7.0, 0.0, 8.0)), RowFactory.create(Vectors.sparse(4, new int[] { 0, 3 }, new double[] { 9.0, 1.0 })));
 		StructType schema = new StructType(new StructField[] { new StructField("features", new VectorUDT(), false, Metadata.empty()), });
-		Dataset<Row> df = spark.createDataFrame(data, schema);
+		Dataset<Row> df = sparkSession.createDataFrame(data, schema);
 
 		df.show(false);
-	}
-
-	public void f1() {
-		Dataset<Row> d1 = spark.read().format("libsvm").load("data/mllib/sample_libsvm_data.txt");
-		d1.show(1000);
 	}
 
 

@@ -25,7 +25,7 @@ public class TestHBase {
 	public static void main(String[] args) throws Exception {
 		TestHBase t = new TestHBase();
 		t.f1("1_webpage");
-		
+
 	}
 
 	public void f1(String tableName) throws Exception {

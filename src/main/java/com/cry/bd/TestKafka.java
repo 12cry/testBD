@@ -12,7 +12,7 @@ public class TestKafka {
 
 	public static void main(String[] args) {
 		Properties props = new Properties();
-		props.put("bootstrap.servers", TestSpark.IP+":9092");
+		props.put("bootstrap.servers", TestAll.IP+":9092");
 		props.put("retries", 0);
 		props.put("linger.ms", 1);
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");

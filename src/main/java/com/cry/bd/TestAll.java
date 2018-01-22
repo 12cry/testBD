@@ -35,12 +35,12 @@ import org.spark_project.guava.collect.ImmutableMap;
 
 import scala.Tuple2;
 
-public class TestSpark {
+public class TestAll {
 
 	public static final String IP = "192.168.153.132";
 
 	public static final void main(String[] ss) throws Exception {
-		TestSpark t = new TestSpark();
+		TestAll t = new TestAll();
 		// t.spark1(ss);
 		t.sparkStreaming1(ss);
 		// t.testSparkKafka(ss);
@@ -164,7 +164,7 @@ public class TestSpark {
 		JavaPairDStream<String, Integer> pairs = words.mapToPair(s -> new Tuple2<>(s, 1));
 		JavaPairDStream<String, Integer> wordCounts = pairs.reduceByKey((i1, i2) -> i1 + i2);
 
-		System.out.println("--------------");
+		System.out.println("---cry2-----------");
 		wordCounts.print();
 		jssc.start();
 		jssc.awaitTermination();
